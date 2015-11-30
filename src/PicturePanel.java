@@ -7,10 +7,11 @@
  * 
  *
  *A dancing character.
- *
- */
+ **/
+import java.awt.BorderLayout;
 import java.awt.Color;
-
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -18,8 +19,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.Random;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -31,15 +36,55 @@ import javax.swing.Timer;
 public class PicturePanel extends JPanel 
 {
     // The width and height of the JPanel upon which things are drawn
-    public static final int width = 800;
-    public static final int height = 600;
+    public static final int width = 1200;
+    public static final int height = 631;
     
     // Fields. Hold the characteristics of the character-- color and smile
-    private Color bodyColor;
-    private Color shadowColor;
-    public static boolean characterIsSmiling;
-    public static int count;
-    private Timer timer;
+    int[][] entries;
+    boolean corollaryeight; // sum of row n = 2^n
+	private JFrame theFrame;
+
+	/**
+	 * The main method, which allows us to run the application without using a
+	 * webpage. In other words, this is the method that is called when you run
+	 * it as a Java application.
+	 */
+	public static void main(String[] args) {
+		// Does the same thing as the init method...
+		new PicturePanel();
+		
+	}
+	
+	/**
+	 * Create the drawing panel and various other components that we need for
+	 * our program.
+	 */
+	public void makeFrame() {
+		theFrame = new JFrame();
+		// Sets up a title!
+		theFrame.setTitle("Pascel's Triangle Fun Facts");
+		// This listens for the user's interaction with the window.
+		theFrame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		;
+
+		// Instantiate the main drawing panel
+		//mainPanel = new PicturePanel();
+
+		// Place all of the graphical components on the main window
+		Container cont = theFrame.getContentPane();
+		// cont.setLayout(new BorderLayout());
+		cont.add(this, BorderLayout.CENTER);
+
+		// Finish setting up the main window
+		theFrame.setBackground(Color.white);
+		theFrame.pack();
+		theFrame.setSize(new Dimension(width, height));
+		theFrame.setVisible(true);
+	}
     
     /**
      * Get stuff ready so when paintComponent is called, it can draw stuff.
@@ -56,329 +101,80 @@ public class PicturePanel extends JPanel
         addMouseMotionListener(mh);
         
         // Initialize number of clicks to 0, and characteristics to default
+        corollaryeight=false;
+        entries = new int[10][];
         
-        bodyColor = new Color(0,0,0);
-        shadowColor = new Color(0,0,0);
-        characterIsSmiling=false;
+        for (int i=0; i<entries.length; i++)
+        {
+                entries[i] = new int[i+1];
+                entries[i][0] = 1;
+                entries[i][i] = 1;
+                for (int j=1; j<i; j++)
+                {
+                        entries[i][j] = entries[i-1][j]+entries[i-1][j-1];
+                }
+        }
+
+        makeFrame();
+        
         // Generates a random number each time the counter clicks, to see 
      	// if the character should change color.
         
-        timer = new Timer(300, new ActionListener() {
-			//Altered from cusack's project...
-			public void actionPerformed(ActionEvent event) {
-				
-				double rand = Math.random();
-
-				if((rand*101 > 80) && (count%2==1)) {
-	                 count=0;
-	            } else { // Otherwise, the character stays the same color
-	                 count++;
-	            }
-				repaint();
-			}
-        });
-        
-        count = 0;
+      
 		
 		// Sets up the timer so the character continuously dances
 		// Starts the timer
-		timer.start();
     }
     
     /**
-     * Generates a random pastel color
-     * @param mix
-     * @return Color
-     */
-    public Color generateRandomPastelColor() {
-        Random random = new Random();
-        int red = random.nextInt(256);
-        int green = random.nextInt(256);
-        int blue = random.nextInt(256);
-
-        // mix the color
-        red = (red + 255) / 2;
-        green = (green + 255) / 2;
-        blue = (blue + 255) / 2;
-        
-        Color color = new Color(red, green, blue);
-        return color;
-    }
-    
-    /**
-     * Generates the shadow color for a character.
-     */
-    public Color getShadowColor(Color color)
-    {
-    	int red = color.getRed();
-    	int green = color.getGreen();
-    	int blue = color.getBlue();
-    	
-    	//Get a darker color
-    	red = (red - 8);
-    	green = (green - 15);
-    	blue = (blue + 5);
-    	
-    	//return new color
-    	Color darkColor = new Color(red, green, blue);
-    	return darkColor;
-    }
-    
-    /**
-     * Draws a cute pastel character.
-     * 
+     * draws pascel's triangle
      * @param g
      */
-    private void drawCharacter(Graphics g)
-    {
-    	if((count==0)){
-    		bodyColor = generateRandomPastelColor();
-    		shadowColor = getShadowColor(bodyColor);
-    	}
-    		
-    	//draw head
-    	g.setColor(bodyColor);
-    	g.fillOval(350,150,100,100);
-    	//draw head outline
-    	// g.setColor(new Color(41,41,41));
-    	// g.drawOval(350,200,101,101);
-    	//draw body
-    	g.setColor(bodyColor);
-    	g.fillRect(350,200,101,125);
-    	//draw butt
-    	g.fillOval(349,317,25,25);
-    	g.fillOval(425,317,25,25);
-    	g.fillRect(362,325,70,17);
-    	//draw shadow
-    	g.setColor(new Color(225,225,225));
-    	g.fillOval(350,380,100,30);
-    	//draw legs
-    	g.setColor(bodyColor);
-    	g.fillRect(365,325,10,70);
-    	g.fillRect(428,325,10,70);
-    	//draw feet shadow
-    	g.setColor(new Color(210,210,210));
-    	g.fillOval(350,390,24,13);
-    	g.fillOval(426,390,23,13);
-    	//draw feet
-    	g.setColor(bodyColor);
-    	g.fillOval(350,386,25,13);
-    	g.fillOval(426,386,25,13);
-    	//draw leg shadow
-    	g.setColor(shadowColor);
-    	g.fillRect(365,341,10,10);
-    	g.fillRect(428,341,10,10);
-    	//draw eye shadow
-    	g.fillOval(364,203,11,11);
-    	g.fillOval(426,203,11,11);
-    	//draw eyes
-    	g.setColor(new Color(30,30,30));
-    	g.fillOval(363,202,10,10);
-    	g.fillOval(425,202,10,10);
-    	g.setColor(new Color(75,75,75));
-    	g.fillOval(364,203,6,6);
-    	g.fillOval(426,203,6,6);
-    	//draw mouth, either smiling or not
-    	if(characterIsSmiling){
-    		g.setColor(new Color(50,0,0));
-    		g.fillOval(393,217,20,20);
-    		g.setColor(bodyColor);
-    		g.fillRect(393,206,23,21);
-    	}
-    	else{
-    		g.setColor(shadowColor);
-    		g.fillOval(393,217,20,20);
-    		g.setColor(bodyColor);
-    		g.fillOval(393,214,20,20);
+    public void drawTriangle(Graphics g){
+    	int count = 50;
+    	int center=0;
+    	int row = 50;
+    	for(int i = 0; i < entries.length; i++){
+    		for(int j=0; j<entries[i].length; j++){
+    			g.setFont(new Font("Calibri",Font.BOLD,20));
+    			g.setColor(Color.BLACK);
+    			g.drawString(Integer.toString(entries[i][j]), 600+count, row);
+    			if(corollaryeight){
+    				g.setColor(Color.red);
+    				if(j==entries[i].length-1){
+    					g.drawString("= "+Integer.toString((int) Math.pow(2, i+1)) + " = 2^"+Integer.toString(i+1), 600+count+50, row);
+    				} else {
+    					g.drawString("+", 600+count+30, row);
+    				}
+    	    	}
+    			count+=50;
+    		}
+    		row+=50;
+    		count=50-(i+1)*25;
     	}
     }
     
-    /**
-     * Draws the character in the middle of a dance move.
-     * 
-     * @param g
-     */
-    public void drawDancingCharacter(Graphics g)
-    {
-    	//draw head
-    	g.setColor(bodyColor);
-    	g.fillOval(350,175,100,100);
-    	//draw head outline
-    	// g.setColor(new Color(41,41,41));
-    	// g.drawOval(350,200,101,101);
-    	//draw body
-    	g.setColor(bodyColor);
-    	g.fillRect(350,225,101,125);
-    	//draw butt
-    	g.fillOval(349,342,25,25);
-    	g.fillOval(425,342,25,25);
-    	g.fillRect(362,350,70,17);
-    	//draw shadow
-    	g.setColor(new Color(225,225,225));
-    	g.fillOval(350,380,100,30);
-    	//draw legs
-    	g.setColor(bodyColor);
-    	g.fillRect(365,325,10,70);
-    	g.fillRect(428,325,10,70);
-    	
-    	//draw feet shadow
-    	g.setColor(new Color(210,210,210));
-    	g.fillOval(350,390,24,13);
-    	g.fillOval(426,390,23,13);
-    	//draw feet
-    	g.setColor(bodyColor);
-    	g.fillOval(350,386,25,13);
-    	g.fillOval(426,386,25,13);
-    	
-    	//draw leg shadow
-    	g.setColor(shadowColor);
-    	g.fillRect(365,366,10,10);
-    	g.fillRect(428,366,10,10);
-    	
-    	//draw eye shadow
-    	g.setColor(shadowColor);
-    	g.fillOval(364,228,11,11);
-    	g.fillOval(426,228,11,11);
-    	//draw eyes
-    	g.setColor(new Color(30,30,30));
-    	g.fillOval(363,228,10,10);
-    	g.fillOval(425,228,10,10);
-    	g.setColor(new Color(75,75,75));
-    	g.fillOval(364,228,6,6);
-    	g.fillOval(426,228,6,6);
-    	//draw mouth, either smiling or not
-    	if(characterIsSmiling){
-    		g.setColor(new Color(50,0,0));
-    		g.fillOval(393,242,20,20);
-    		g.setColor(bodyColor);
-    		g.fillRect(393,231,23,21);
+    public void drawButtons(Graphics g){
+    	int count = 0;
+    	int lim = 6;
+    	int w=200;
+    	int h=100;
+    	g.setColor(Color.gray);
+    	for(int i = 0;i<lim;i++){
+    		g.fill3DRect(count, i*100, w, h,true);
     	}
-    	else{
-    		g.setColor(shadowColor);
-        	g.fillOval(393,242,20,20);
-        	g.setColor(bodyColor);
-        	g.fillOval(393,239,20,20);
-    	}
+    	g.setColor(Color.black);
+    	g.setFont(new Font("Calibri",Font.PLAIN,20));
+    	g.drawString("2^n", 80, 50);
+    	g.drawString("RESET", 80, 550);
+    	
+    	
     }
+   
     
-    /**
-     * Draws the background.
-     */
-    public void drawBackground(Graphics g)
-    {
-    	g.setColor(new Color(208,208,208));
-    	g.fillOval(-1100, 178, 3100, 800);
-    	g.setColor(new Color(215,215,215));
-    	g.fillOval(-700, 180, 2200, 700);
-    	g.setColor(new Color(225,225,225));
-    	g.fillOval(-400, 185, 1600, 600);
-    	g.setColor(new Color(230,230,230));
-    	g.fillOval(-200, 200, 1200, 500);
-    	g.setColor(new Color(235,235,235));
-    	g.fillOval(-50, 225, 900, 400);
-    	g.fillRect(0,0,800,170);
-    	// Draw buildings
-    	g.setColor(new Color(200,200,200));
-    	g.fillRect(0,170,800,25);
-    	g.fillRect(0,145,25,50);
-    	g.fillRect(50,120,60,65);
-    	g.fillRect(110,145,40,30);
-    	g.fillRect(150,70,30,100);
-    	g.fillRect(180,90,50,80);
-    	g.fillRect(230,150,40,30);
-    	g.fillRect(340,120,60,65);
-    	g.fillRect(400,90,50,80);
-    	g.fillRect(450,150,40,30);
-    	g.fillRect(490,120,60,65);
-    	g.fillRect(550,145,40,30);
-    	g.fillRect(650,70,30,100);
-    	g.fillRect(680,120,60,65);
-    	//draw windows
-    	g.setColor(new Color(235,235,235));
-    	g.fillRect(61,130,9,9);
-    	g.fillRect(86,130,9,9);
-    	g.fillRect(86,154,9,9);
-    	g.fillRect(155,75,7,7);
-    	g.fillRect(166,103,7,7);
-    	g.fillRect(166,114,7,7);
-    	g.fillRect(155,114,7,7);
-    	g.fillRect(155,137,7,7);
-    	g.fillRect(345,125,8,8);
-    	g.fillRect(370,142,8,8);
-    	g.fillRect(386,142,8,8);
-    	g.fillRect(665,75,7,7);
-    	g.fillRect(665,85,7,7);
-    	g.fillRect(655,105,7,7);
-    	g.fillRect(665,135,7,7);
-    	g.fillRect(61,130,9,9);
-    	g.fillRect(86,130,9,9);
-    	g.fillRect(690,154,9,9);
-    	g.fillRect(705,130,9,9);
-    }
     
-    /**
-     * This draws the character kicking.
-     */
-    public void drawCharacterKick(Graphics g)
-    {
-    	//draw head
-    	g.setColor(bodyColor);
-    	g.fillOval(350,175,100,100);
-    	//draw head outline
-    	// g.setColor(new Color(41,41,41));
-    	// g.drawOval(350,200,101,101);
-    	//draw body
-    	g.setColor(bodyColor);
-    	g.fillRect(350,225,101,125);
-    	//draw butt
-    	g.fillOval(349,342,25,25);
-    	g.fillOval(425,342,25,25);
-    	g.fillRect(362,350,70,17);
-    	//draw shadow
-    	g.setColor(new Color(225,225,225));
-    	g.fillOval(350,380,100,30);
-    	//draw legs
-    	g.setColor(bodyColor);
-    	g.fillRect(365,325,10,70);
-    	g.fillRect(428,325,70,10);
-    	
-    	//draw feet shadow
-    	g.setColor(new Color(210,210,210));
-    	g.fillOval(350,390,24,13);
-    	//draw feet
-    	g.setColor(bodyColor);
-    	g.fillOval(350,386,25,13);
-    	g.fillOval(490,310,13,25);
-    	
-    	//draw leg shadow
-    	g.setColor(shadowColor);
-    	g.fillRect(365,366,10,10);
-    	
-    	//draw eye shadow
-    	g.setColor(shadowColor);
-    	g.fillOval(364,228,11,11);
-    	g.fillOval(426,228,11,11);
-    	//draw eyes
-    	g.setColor(new Color(30,30,30));
-    	g.fillOval(363,228,10,10);
-    	g.fillOval(425,228,10,10);
-    	g.setColor(new Color(75,75,75));
-    	g.fillOval(364,228,6,6);
-    	g.fillOval(426,228,6,6);
-    	//draw mouth, either smiling or not
-    	if(characterIsSmiling){
-    		g.setColor(new Color(50,0,0));
-    		g.fillOval(393,242,20,20);
-    		g.setColor(bodyColor);
-    		g.fillRect(393,231,23,21);
-    	}
-    	else{
-    		g.setColor(shadowColor);
-        	g.fillOval(393,242,20,20);
-        	g.setColor(bodyColor);
-        	g.fillOval(393,239,20,20);
-    	}
-    }
+    
+    
     
 
     /**
@@ -390,36 +186,9 @@ public class PicturePanel extends JPanel
      */
     public void paintComponent(Graphics g) 
     {
-        // Always place this as the first line in paintComponent.
-        super.paintComponent(g);
-        //Draws the background
-        drawBackground(g);
-        // Draws the character if the count is even and the count
-        //is not above 1001
-	    if((count%2==0)&&(count<1001)){
-	    	drawCharacter(g);
-	    } 
-	    // A click in the background sets the click amount to 1001, 
-	    // signifying that the character should kick.
-	    // Once the character is set to kick, the count is reset to 1,
-	    // as setting to zero would change the color.
-	    else if(count==1001){
-	    	drawCharacterKick(g);
-	    	count=1;
-	    } 
-	    // If the count is odd, the character is drawn in its dance 
-	    //move. This similates a dance because the character alternates
-	    // between frames each second or so.
-	    else{
-	    	drawDancingCharacter(g);
-	    }
- 
-	    // Draw a string which tells the user what to do, and the author
-	    g.setColor(Color.black);
-	    g.setFont(new Font("Calibri",Font.BOLD,30));
-        g.drawString("Click me or the Background!",40,40);
-        g.setFont(new Font("Calibri",Font.BOLD,20));
-        g.drawString("By: Madeline Smith", 600, 550);
+        
+        drawTriangle(g);
+        drawButtons(g);
         
     }
     
@@ -436,15 +205,15 @@ public class PicturePanel extends JPanel
       
         public void mouseClicked(MouseEvent e) 
         {
-        	//If the mouse clicks on the background, have him kick
-        	if((e.getX()<430)&&(e.getX()>350)&&(e.getY()>150)&&(e.getY()<309))
-			 {
-        		// not character, but background
-			 }
-        	else{
-        		PicturePanel.count=1001;
-            	repaint();
+        	if(e.getX()>=0 && e.getX()<=200 && e.getY()>=0 && e.getY()<=100){
+        		// 2^n pattern
+        		corollaryeight=true;
+        		
+        	} 
+        	if(e.getX()>=0 && e.getX()<=200 && e.getY()>=500 && e.getY()<=600){
+        		corollaryeight=false;
         	}
+        	theFrame.repaint();
         }
 
         public void mouseEntered(MouseEvent e)
@@ -455,12 +224,7 @@ public class PicturePanel extends JPanel
         }        
         public void mousePressed(MouseEvent e) 
         {
-        	// If the user clicks on the character, the character
-        	// opens or closes his mouth.
-        	if((e.getX()<430)&&(e.getX()>350)&&(e.getY()>150)&&(e.getY()<309))
-			 {
-				 		PicturePanel.characterIsSmiling=!PicturePanel.characterIsSmiling;
-			 }
+        
         }        
         public void mouseReleased(MouseEvent e) 
         {

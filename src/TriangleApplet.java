@@ -35,8 +35,8 @@ public class TriangleApplet extends JApplet {
 	// to run this as a stand alone application.
 
 	// The desired dimensions of the main window
-	private int width = 800;
-	private int height = 600;
+	private int width = 1200;
+	private int height = 631;
 
 	// The graphical components
 	private static PicturePanel mainPanel;
@@ -61,7 +61,7 @@ public class TriangleApplet extends JApplet {
 		// Sets up the graphical components of the window.
 		JFrame theFrame = new JFrame();
 		// Sets up a title!
-		theFrame.setTitle("A Dancing Character!");
+		theFrame.setTitle("Pascel's Triangle Fun Facts");
 		// This listens for the user's interaction with the window.
 		theFrame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
